@@ -56,15 +56,6 @@ int DataScan::main(const std::vector<const char*> &args)
   dout(4) << "connecting to RADOS..." << dendl;
   rados.connect();
 
-#if 1
-  // TODO parse args
-  n = 0;
-  m = 1;
-#else
-  n = 0;
-  m = 256;
-#endif
- 
   {
     int const metadata_pool_id = mdsmap->get_metadata_pool();
     dout(4) << "resolving metadata pool " << metadata_pool_id << dendl;
@@ -88,6 +79,7 @@ int DataScan::main(const std::vector<const char*> &args)
       usage();
       return -EINVAL;
     }
+
     const std::string data_pool_name = args[1];
     {
       data_pool_id = rados.pool_lookup(data_pool_name.c_str());
@@ -110,6 +102,22 @@ int DataScan::main(const std::vector<const char*> &args)
         return r;
       }
     }
+
+    // Parse `n` and `m` arguments
+    if (args.size() >= 4) {
+      std::string err;
+      n = strict_strtoll(args[2], 10, &err);
+      if (!err.empty()) {
+        std::cerr << "Invalid worker number '" << args[2] << "'" << std::endl;
+        return -EINVAL;
+      }
+      m = strict_strtoll(args[3], 10, &err);
+      if (!err.empty()) {
+        std::cerr << "Invalid worker count '" << args[3] << "'" << std::endl;
+        return -EINVAL;
+      }
+    }
+
     if (command == "scan_inodes") {
       return recover();
     } else if (command == "scan_extents") {

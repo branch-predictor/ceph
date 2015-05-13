@@ -124,7 +124,7 @@ objects.
     # InoTable
     cephfs-table-tool 0 reset inode
     # Journal
-    cephfs-journal-tool journal reset 0
+    cephfs-journal-tool --rank=0 journal reset
     # Root inodes ("/" and MDS directory)
     cephfs-data-scan init
 
